@@ -1,0 +1,6 @@
+{
+  "name": "moneta",
+  "description": "Your agent reads a 3,000-line file for 5 lines. MONETA minds the spend. Honest token discipline: warn-mode lens, 40% pre-work gate, lower-bound ledger.",
+  "version": "0.1.0",
+  "author": { "name": "Eragon (Demiurge)" }
+}
