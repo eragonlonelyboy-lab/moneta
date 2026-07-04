@@ -5,9 +5,9 @@ A cost tool that lies about savings is worse than no tool. Here is the full ledg
 ## The estimates are estimates
 
 - **chars/4 is an approximation.** Real tokenization varies by content (code tokenizes denser than prose). We state the divisor, we label every figure `(estimate)`, and we round down. If you need billing truth, use `/cost` and your provider invoice: MONETA prints the Claude Code cost figure on the card *because that one is not ours*.
-- **"Loads avoided" is a lower bound with an assumption baked in:** when a warned Read is replaced by a Grep or a targeted Read, we bank the difference. We cannot know the model would truly have read the whole file: but we also don't count warns the agent ignored, warns followed by nothing, or anything twice. One warn banks at most once. The direction of every error is downward.
+- **"Loads avoided" is a lower bound with an assumption baked in:** when a warned Read is replaced by a Grep or a targeted Read, we bank the difference. We cannot know the model would truly have read the whole file, but we also don't count warns the agent ignored, warns followed by nothing, or anything twice. One warn banks at most once. The direction of every error is downward.
 - **No per-rule attribution, permanently.** "The grep-first rule saved you 31%" requires a counterfactual session that never ran. Tools that publish per-rule percentages are decorating a guess. You get one aggregate lower bound.
-- **The industry cautionary tale is why this page exists.** The most-starred token tool's 65–75% headline collapsed to 4–10% real session savings under independent testing: and its community *rewarded* the honest correction. We start where they were forced to arrive.
+- **The industry cautionary tale is why this page exists.** The most-starred token tool's 65–75% headline collapsed to 4–10% real session savings under independent testing, and its community *rewarded* the honest correction. We start where they were forced to arrive.
 
 ## When MONETA is worthless
 
