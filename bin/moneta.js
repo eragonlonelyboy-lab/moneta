@@ -91,9 +91,53 @@ function siblingCheck() {
 
 function val(args, flag) { const i = args.indexOf(flag); return i >= 0 ? args[i + 1] : null; }
 
+// Guided setup: state-aware, explains every step in plain language, safe to re-run.
+function setup() {
+  const ok = m => console.log('  [done] ' + m);
+  const todo = m => console.log('  [next] ' + m);
+  const info = m => console.log('         ' + m);
+  const { loadConfig } = require('../lib/config');
+  console.log('MONETA guided setup (re-run this any time; it only reads, never changes)\n');
+
+  // Step 1: hooks + statusline
+  const s = readJSON(SETTINGS, {});
+  const hooked = ['PreToolUse', 'PostToolUse'].every(ev => (s.hooks && s.hooks[ev] || []).some(g => (g.hooks || []).some(h => String(h.command || '').includes(MARK))));
+  const sl = s.statusLine && String(s.statusLine.command || '').includes(MARK);
+  console.log('Step 1 of 3: the lens and the meter (required, one command, automatic forever after)');
+  if (hooked && sl) ok('Registered. Every session is watched: warnings before fat reads, honest counting after.');
+  else {
+    todo('Run: moneta install');
+    info('What it does: a warning fires BEFORE your agent reads a huge file (it can still read it:');
+    info('warn-mode never blocks). A gate speaks up if 40% of the context goes to reading before any');
+    info('real work. The statusline gains a live "tokens avoided" ticker. If you already have a');
+    info('statusline, MONETA runs yours first and appends: nothing is replaced.');
+  }
+
+  // Step 2: how it counts
+  console.log('\nStep 2 of 3: understand the number (nothing to configure)');
+  info('The ticker is a LOWER BOUND, always labeled an estimate. A warn only counts when your agent');
+  info('actually obeyed it (grepped instead of reading whole). Each warn counts at most once. MONETA');
+  info('never claims per-rule percentages: no counterfactual exists, so that number would be fake.');
+
+  // Step 3: dials
+  const cfg = loadConfig();
+  console.log('\nStep 3 of 3: the dials (OPTIONAL: the defaults are the recommendation)');
+  ok(`mode: "${cfg.mode}"${cfg.mode === 'warn' ? ' (warnings only, never blocks: the default we recommend)' : ' (deny-mode: oversized reads are BLOCKED: you opted into this)'}`);
+  info(`warn threshold: reads estimated over ~${Math.round(cfg.read_warn_tokens / 1000)}k tokens get a nudge. Raise it in ~/.moneta/config.json if your work needs whole files.`);
+  info(`pre-work gate: ${cfg.pregate_pct}% of context on reading before the first edit triggers a re-plan suggestion.`);
+
+  // Handshake
+  const fsx = require('fs');
+  if (fsx.existsSync(path.join(os.homedir(), '.horkos'))) ok('HORKOS detected: your report cards can be stamped "cheaper AND provably not-worse".');
+  else info('Pair with HORKOS (the evidence-audit sibling) and the report card upgrades savings from "estimate" to "cheaper AND provably not-worse".');
+  console.log('\nPrefer a guided conversation? Open your agent in this repo and say: "set up MONETA for me".');
+  console.log((hooked && sl) ? '\nSetup state: READY. Run "moneta report" after your next session.' : '\nSetup state: one command away (moneta install).');
+}
+
 const [cmd, ...args] = process.argv.slice(2);
-({ install, uninstall, status, report: () => report(args) }[cmd] || (() => {
-  console.log('moneta <install|uninstall|report|status>');
+({ install, uninstall, status, setup, report: () => report(args) }[cmd] || (() => {
+  console.log('moneta <setup|install|uninstall|report|status>');
+  console.log('  setup      guided, state-aware walkthrough: explains every step, safe to re-run');
   console.log('  install    discipline lens + 40% gate + honest ledger + statusline bridge/ticker');
   console.log('  report     session report card (--session <id> for a specific one)');
   console.log('  status     lifetime lower-bound counter');

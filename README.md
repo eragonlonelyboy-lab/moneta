@@ -46,6 +46,8 @@ git clone https://github.com/eragonlonelyboy-lab/moneta && cd moneta && node bin
 ```
 Node 18+, zero dependencies, re-run safe. Already have a statusline? MONETA wraps it and appends the ticker: nothing is replaced. Broke something? Open your agent in this repo and say: *read the README and fix my MONETA install.*
 
+Not sure where you are? `moneta setup` is a guided, state-aware walkthrough: it explains every step, every dial, and the honest math behind the ticker, and never changes anything itself.
+
 ## Benchmarks
 
 Reproducible, in-repo, deterministic: `npm test`
