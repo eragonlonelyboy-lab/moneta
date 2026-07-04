@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 'use strict';
 // MONETA PostToolUse: the honest ledger. Records what was actually ingested and when work started.
-// Pure accounting — never blocks, never throws.
+// Pure accounting: never blocks, never throws.
 const { loadConfig, readJSON, writeJSON, appendJSONL, statePath, ledgerPath, estTokens } = require('../lib/config');
 
 const WORK_TOOLS = /^(Write|Edit|NotebookEdit)$/;
@@ -24,7 +24,7 @@ process.stdin.on('end', () => {
     if (!st.work_started && (WORK_TOOLS.test(tool) || (tool.startsWith('mcp__') && WRITE_MCP.test(tool.slice(tool.lastIndexOf('__') + 2))))) {
       st.work_started = true;
       st.work_started_ts = Date.now();
-      // Freeze the context % at first edit — a headline report-card number.
+      // Freeze the context % at first edit: a headline report-card number.
       const bridge = readJSON(require('../lib/config').bridgePath(sid), {});
       st.pct_at_first_edit = bridge.used_percentage != null ? Math.round(bridge.used_percentage) : null;
       writeJSON(statePath(sid), st);
@@ -43,7 +43,7 @@ process.stdin.on('end', () => {
 
       // Warn-obeyed accounting (lower bound): a prior warn on this file, and this access is
       // a Grep or a targeted Read instead of the full Read -> the avoided delta is banked.
-      // Each warn banks at most ONCE (banked_warn_ts in state) — double-counting would be a fake number.
+      // Each warn banks at most ONCE (banked_warn_ts in state): double-counting would be a fake number.
       if (ti.file_path || tool === 'Grep') {
         st.banked_warn_ts = st.banked_warn_ts || [];
         const entries = require('../lib/config').readJSONL(ledgerPath(sid));

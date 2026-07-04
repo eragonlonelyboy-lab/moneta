@@ -65,6 +65,32 @@ out = hook('pretooluse.js', { session_id: SID + '2', tool_name: 'Read', tool_inp
 check('deny-mode (opt-in) blocks giant Read', out.includes('"permissionDecision":"deny"'), out.slice(0, 100));
 fs.writeFileSync(path.join(HOME, 'config.json'), JSON.stringify({}));
 
+// 6b. Read-shrink (opt-in): oversized Read rewritten to offset/limit instead of blocked.
+fs.writeFileSync(path.join(HOME, 'config.json'), JSON.stringify({ read_shrink: true, deny_tokens: 10000, mode: 'warn' }));
+out = hook('pretooluse.js', { session_id: SID + '3', tool_name: 'Read', tool_input: { file_path: FAT } });
+check('read-shrink rewrites Read via updatedInput (opt-in)', out.includes('"updatedInput"') && out.includes('"limit":200') && out.includes('"permissionDecision":"allow"'), out.slice(0, 140));
+fs.writeFileSync(path.join(HOME, 'config.json'), JSON.stringify({}));
+
+// STRESS: malformed statusline stdin must not crash and still emits something safe.
+out = execFileSync('node', [path.join(REPO, 'statusline', 'moneta-statusline.js')], { input: 'not json at all {', encoding: 'utf8', env: { ...process.env, MONETA_HOME: HOME } });
+check('statusline survives garbage stdin', typeof out === 'string');
+
+// STRESS: Read of a nonexistent file passes silently (no stat crash).
+out = hook('pretooluse.js', { session_id: SID, tool_name: 'Read', tool_input: { file_path: path.join(fixtures, 'ghost.md') } });
+check('nonexistent-file Read passes silently', out === '');
+
+// STRESS: 40% gate fires WITHOUT the bridge (fallback: summed read estimates vs 200k window).
+const SID4 = SID + '4';
+const bigResp = 'y'.repeat(200000); // ~50k tokens est per response
+hook('posttooluse.js', { session_id: SID4, tool_name: 'Read', tool_input: { file_path: SMALL }, tool_response: bigResp });
+hook('posttooluse.js', { session_id: SID4, tool_name: 'Read', tool_input: { file_path: SMALL }, tool_response: bigResp });
+out = hook('pretooluse.js', { session_id: SID4, tool_name: 'Grep', tool_input: { pattern: 'z' } });
+check('gate falls back without bridge data', out.includes('BUDGET GATE'), out.slice(0, 100));
+
+// STRESS: report on an unknown session renders without crashing.
+const { buildReport: br2, renderReport: rr2 } = require('../lib/report');
+check('report survives unknown session', typeof rr2(br2('no-such-session')) === 'string');
+
 // 7. Report card renders with the honesty line.
 const { buildReport, renderReport } = require('../lib/report');
 const card = renderReport(buildReport(SID));
@@ -74,7 +100,7 @@ check('report card renders honestly', card.includes('lower bound') && card.inclu
 console.log('\nMONETA accounting benchmark');
 console.log('| check | pass |');
 console.log('|---|---|');
-for (const r of results) console.log(`| ${r.name} | ${r.pass ? 'YES' : 'NO — ' + r.detail} |`);
+for (const r of results) console.log(`| ${r.name} | ${r.pass ? 'YES' : 'NO: ' + r.detail} |`);
 const passed = results.filter(r => r.pass).length;
 console.log(`\n${passed}/${results.length} checks pass.`);
 process.exit(passed === results.length ? 0 : 1);

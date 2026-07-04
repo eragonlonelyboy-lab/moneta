@@ -32,14 +32,14 @@ process.stdin.on('end', () => {
 
         const bridge = readJSON(bridgePath(sid), {});
         const pctNote = bridge.used_percentage != null ? ` Context is at ${Math.round(bridge.used_percentage)}%.` : '';
-        const msg = `MONETA: this Read is ~${Math.round(est / 1000)}k tokens (${bytes} bytes).${pctNote} Grep for the pattern or Read with offset/limit first — never load a whole file for a few lines. If you truly need the full file, proceed; this is a warning, not a wall.`;
+        const msg = `MONETA: this Read is ~${Math.round(est / 1000)}k tokens (${bytes} bytes).${pctNote} Grep for the pattern or Read with offset/limit first: never load a whole file for a few lines. If you truly need the full file, proceed; this is a warning, not a wall.`;
 
         if (cfg.mode === 'deny' && est >= cfg.deny_tokens) {
           return out({ hookSpecificOutput: { hookEventName: 'PreToolUse', permissionDecision: 'deny', permissionDecisionReason: `MONETA (deny-mode, opt-in): Read of ~${Math.round(est / 1000)}k tokens exceeds the ${Math.round(cfg.deny_tokens / 1000)}k hard cap. Grep or use offset/limit. Override: set mode:"warn" in ~/.moneta/config.json.` } });
         }
         if (cfg.read_shrink && est >= cfg.deny_tokens) {
           // Opt-in: rewrite the oversized Read into a head slice instead of blocking.
-          return out({ hookSpecificOutput: { hookEventName: 'PreToolUse', permissionDecision: 'allow', updatedInput: { ...ti, offset: 1, limit: 200 }, additionalContext: msg + ' (MONETA rewrote this Read to the first 200 lines — re-Read with a targeted offset if you need more.)' } });
+          return out({ hookSpecificOutput: { hookEventName: 'PreToolUse', permissionDecision: 'allow', updatedInput: { ...ti, offset: 1, limit: 200 }, additionalContext: msg + ' (MONETA rewrote this Read to the first 200 lines: re-Read with a targeted offset if you need more.)' } });
         }
         return out({ hookSpecificOutput: { hookEventName: 'PreToolUse', permissionDecision: 'allow', additionalContext: msg } });
       }

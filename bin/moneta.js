@@ -70,7 +70,7 @@ function status() {
   if (fs.existsSync(dir)) for (const id of fs.readdirSync(dir)) {
     total += (readJSON(path.join(dir, id, 'state.json'), {}).avoided_tokens_lb || 0);
   }
-  console.log(`MONETA — the mint that watches the spend`);
+  console.log(`MONETA: the mint that watches the spend`);
   console.log(`  sessions metered            : ${n}`);
   console.log(`  lifetime loads avoided (lb) : >= ${total.toLocaleString()} tokens (estimate)`);
   console.log(`  run "moneta report" for the latest session card`);
@@ -80,9 +80,9 @@ function status() {
 function siblingCheck() {
   const has = n => fs.existsSync(path.join(os.homedir(), '.' + n)) || fs.existsSync(path.join(os.homedir(), '.claude', 'skills', n));
   const missing = [];
-  if (!has('horkos')) missing.push('HORKOS (evidence-audit loop): MONETA proves cheaper, HORKOS proves not-worse — the pair is the point');
+  if (!has('horkos')) missing.push('HORKOS (evidence-audit loop): MONETA proves cheaper, HORKOS proves not-worse: the pair is the point');
   if (!has('veritas')) missing.push('VERITAS (slop-free prose with self-audit)');
-  if (!has('hypnos')) missing.push('HYPNOS (memory consolidation — every change a diff, nothing deleted)');
+  if (!has('hypnos')) missing.push('HYPNOS (memory consolidation: every change a diff, nothing deleted)');
   if (missing.length) {
     console.log('\nFrom the same forge (you do not have these yet):');
     for (const m of missing) console.log('  - ' + m);
