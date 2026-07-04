@@ -1,4 +1,4 @@
-# MONETA
+# MONETA: Measured Output, No Estimate Theater, Accounted
 
 **Your agent reads a 3,000-line file for 5 lines. MONETA minds the spend.**
 
