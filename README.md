@@ -6,6 +6,8 @@
 
 *Your Claude Code agent reads a 3,000-line file for 5 lines. MONETA minds the token spend, and counts only what it can prove.*
 
+**AI FinOps for your agents. Stop burning tokens.**
+
 ![license](https://img.shields.io/badge/license-MIT-E8A23D)
 ![node](https://img.shields.io/badge/node-%E2%89%A518-2C7A7B)
 ![benchmarks](https://img.shields.io/badge/benchmarks-34%2F34-E8A23D)
