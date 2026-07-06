@@ -9,7 +9,7 @@
   },
   "engines": { "node": ">=18" },
   "keywords": ["claude-code", "hooks", "tokens", "context", "budget", "cost", "statusline", "demiurge"],
-  "author": "Eragon (Demiurge)",
+  "author": "Eragon Lee (Demiurge)",
   "license": "MIT",
   "repository": { "type": "git", "url": "https://github.com/eragonlonelyboy-lab/moneta" }
 }

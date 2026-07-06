@@ -37,7 +37,7 @@ Field notes:
 - Context-% features (the 40% gate, budget checkpoints) need `bridge.json` in the session dir:
   `{ "used_percentage": <number>, "cost_usd": <number|null> }`. In Claude Code the statusline writes it;
   in another runtime, write it from wherever that runtime exposes context usage. Without it, the gate
-  falls back to summed read estimates and the checkpoints stay silent — silent, not guessed.
+  falls back to summed read estimates and the checkpoints stay silent. Silent, not guessed.
 
 ## Laws every adapter inherits
 
@@ -50,5 +50,5 @@ Field notes:
 ## What Tier 1 covers when there is no adapter
 
 No hooks in your runtime? `moneta compile` writes the same doctrine into the workspace instruction
-files that runtime reads (CLAUDE.md, AGENTS.md, Cursor, Windsurf). Governed, unmeasured — and the
+files that runtime reads (CLAUDE.md, AGENTS.md, Cursor, Windsurf). Governed, unmeasured, and the
 report card will never pretend otherwise.

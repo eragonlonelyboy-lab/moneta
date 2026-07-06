@@ -18,11 +18,11 @@ A cost tool that lies about savings is worse than no tool. Here is the full ledg
 ## Tier 1 is governance, never a number
 
 - **Compiled doctrine has no ledger.** `moneta compile` puts the rules in front of every agent that reads the workspace (CLAUDE.md, AGENTS.md, Cursor, Windsurf), but a model following written rules produces no observable event stream. Those sessions are **governed, unmeasured**: no ticker, no card, no claim. Any tool that tells you what its *instructions* saved is reading tea leaves.
-- **Instruction files are advisory by nature.** A model can ignore a rule in a way it cannot ignore a deny. We say "governed," not "enforced," on purpose — enforcement is a Tier 2 (hooks) property only.
+- **Instruction files are advisory by nature.** A model can ignore a rule in a way it cannot ignore a deny. We say "governed," not "enforced," on purpose: enforcement is a Tier 2 (hooks) property only.
 
 ## Dedup and budget nudges are advice, not savings
 
-- **Dedup warns are never banked.** When MONETA flags a repeat read/search/fetch, there's no counterfactual for what the agent would have done — so the catch is counted on the card (`dedup catches`) but adds zero to the avoided ticker. Also: after a context compaction a re-read can be *correct*; the warn says so and steps aside.
+- **Dedup warns are never banked.** When MONETA flags a repeat read/search/fetch, there's no counterfactual for what the agent would have done, so the catch is counted on the card (`dedup catches`) but adds zero to the avoided ticker. Also: after a context compaction a re-read can be *correct*; the warn says so and steps aside.
 - **Budget checkpoints fire on the bridge number,** which lags and approximates (see below). They speak once each and never block. Whether wrapping up at 80% saved your session's quality is not measurable, so it is not measured.
 
 ## Mechanical limits
