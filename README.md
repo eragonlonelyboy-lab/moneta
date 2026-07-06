@@ -26,13 +26,22 @@ The ticker on your statusline only counts what verifiably didn't enter context. 
 
 ## What it does (and the platform doesn't)
 
-Claude Code already shows you context (`/context`), compacts it, and prices it (`/cost`). What nothing native or third-party does:
+Claude Code already shows you context (`/context`), compacts it, and prices it (`/cost`). MONETA is the **token-discipline harness**: it governs the whole context economy in two tiers, and counts only what it can prove.
+
+**Tier 2: the runtime harness (measured).** Hooks in the agent runtime — deterministic, token-free, warn-first:
 
 1. **The discipline lens**: PreToolUse warn on oversized Reads, with the file stat'ed on disk *before* the read happens. Warn-mode by default; Claude sees the nudge and decides. Deny-mode and auto-shrink (rewrite to `offset/limit`) exist but are opt-in: you flip them, not us.
-2. **The 40% pre-work budget gate**: if file-reading eats 40% of your context before the first edit is made, MONETA says stop and re-plan. Nothing else ships a *pre-work* gate.
-3. **The honest ledger**: loads avoided as a **lower bound**, `≥N (estimate)` always labeled, chars/4 stated as the approximation. No per-rule attribution, ever: there is no observable counterfactual, so that number would be theater.
-4. **The report card**: `moneta report`: loads avoided, context-% at first edit, grep:read ratio, a waste heatmap by directory (which paths eat your window), and the session cost from Claude Code itself.
-5. **The quality handshake**: a savings number is meaningless if the work got worse. If [HORKOS](https://github.com/eragonlonelyboy-lab/horkos) is installed, MONETA stamps sessions **"cheaper AND provably not-worse"** from its evidence audit. Without it: `UNPROVEN: estimates only`, printed right on the card. Efficiency and quality, or it doesn't count.
+2. **The redundancy lens**: re-reading a file already ingested, re-running an identical search, re-fetching a URL already fetched — each warned once. It is already in context; the harness remembers so the model doesn't have to.
+3. **The 40% pre-work budget gate**: if file-reading eats 40% of your context before the first edit is made, MONETA says stop and re-plan. Nothing else ships a *pre-work* gate.
+4. **Budget checkpoints**: one nudge at 60% context (offload, summarize, plan the remainder) and one at 80% (wrap up and compact). A harness manages the window; a meter just watches it.
+5. **Whole-intake accounting + output nudges**: every result that enters context is ledgered by class (reads, searches, shell, web, MCP, sub-agents). A shell dump or MCP payload over ~8k tokens gets a once-per-class filtering tip.
+6. **The honest ledger**: loads avoided as a **lower bound**, `≥N (estimate)` always labeled, chars/4 stated as the approximation. No per-rule attribution, ever: there is no observable counterfactual, so that number would be theater.
+7. **The report card**: `moneta report`: loads avoided, context-% at first edit, grep:read ratio, dedup catches, intake by class, a waste heatmap by directory, and the session cost from Claude Code itself.
+8. **The quality handshake**: a savings number is meaningless if the work got worse. If [HORKOS](https://github.com/eragonlonelyboy-lab/horkos) is installed, MONETA stamps sessions **"cheaper AND provably not-worse"** from its evidence audit. Without it: `UNPROVEN: estimates only`, printed right on the card. Efficiency and quality, or it doesn't count.
+
+**Tier 1: the doctrine (every agent, any model).** Your workspace folder is shared by every AI you point at it — so `moneta compile` writes the same discipline rules into the instruction files they all read (`CLAUDE.md`, `AGENTS.md`, Cursor rules, Windsurf rules), behind managed markers, dry-run by default. Any model that opens the folder is governed; only hooked runtimes are *measured*. The honest line, printed everywhere it matters: **Tier 1 agents are governed, unmeasured** — MONETA never invents a number for a session it couldn't see.
+
+The hooks are thin adapters over a runtime-agnostic core (`lib/core.js`): Claude Code is the reference adapter, and any runtime that can call a command per tool event can be harnessed the same way — see [docs/ADAPTERS.md](docs/ADAPTERS.md).
 
 ## Install
 
@@ -50,24 +59,25 @@ Not sure where you are? `moneta setup` is a guided, state-aware walkthrough: it 
 
 ## Benchmarks
 
-Reproducible, in-repo, deterministic: `npm test`
+Reproducible, in-repo, deterministic: `npm test` — **34/34**.
 
-| check | pass |
-|---|---|
-| warn fires on fat Read | YES |
-| small Read passes silently | YES |
-| avoided banks once (lower bound) | YES |
-| 40% gate fires from bridge | YES |
-| gate fires only once | YES |
-| work start recorded with pct | YES |
-| deny-mode (opt-in) blocks giant Read | YES |
-| report card renders honestly | YES |
+| group | checks | pass |
+|---|---|---|
+| discipline lens (warn / deny / shrink / silent-small) | 4 | YES |
+| honest ledger (banks once, work-start, gate once, bridge fallback) | 6 | YES |
+| redundancy lens (read / grep / webfetch dedup, once per key) | 5 | YES |
+| broadened intake + output nudges (shell accounted, once per class) | 3 | YES |
+| budget checkpoints (60/80, each once) | 4 | YES |
+| Tier 1 compiler (dry-run, apply, idempotent, cursor, create, remove) | 6 | YES |
+| report card (honesty line, tier line, dedup, intake by class) + stress | 6 | YES |
 
-8/8. And read [docs/HONEST-NUMBERS.md](docs/HONEST-NUMBERS.md) before you quote any number: it lists exactly when MONETA is worthless, on purpose.
+And read [docs/HONEST-NUMBERS.md](docs/HONEST-NUMBERS.md) before you quote any number: it lists exactly when MONETA is worthless, on purpose.
 
 ## CLI
 
 ```
+moneta compile [--apply|--remove] [--create] [--target <dir>]
+                                 # Tier 1: doctrine into CLAUDE.md/AGENTS.md/Cursor/Windsurf (dry-run default)
 moneta report [--session <id>]   # the session report card
 moneta status                    # lifetime lower-bound counter
 moneta uninstall                 # hooks + statusline out; your original statusline restored; ledgers kept

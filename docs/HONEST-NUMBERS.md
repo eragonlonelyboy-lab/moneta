@@ -15,6 +15,16 @@ A cost tool that lies about savings is worse than no tool. Here is the full ledg
 - **Whole-file-context work.** Some tasks genuinely need full files (large refactors, file-level review). The warns become noise: set `read_warn_tokens` higher or `MONETA_DISABLED=1` for that session. An ignored warn costs you one paragraph of context; that cost is real and it's yours.
 - **Sessions that are mostly conversation.** No reads, no ledger, no card.
 
+## Tier 1 is governance, never a number
+
+- **Compiled doctrine has no ledger.** `moneta compile` puts the rules in front of every agent that reads the workspace (CLAUDE.md, AGENTS.md, Cursor, Windsurf), but a model following written rules produces no observable event stream. Those sessions are **governed, unmeasured**: no ticker, no card, no claim. Any tool that tells you what its *instructions* saved is reading tea leaves.
+- **Instruction files are advisory by nature.** A model can ignore a rule in a way it cannot ignore a deny. We say "governed," not "enforced," on purpose — enforcement is a Tier 2 (hooks) property only.
+
+## Dedup and budget nudges are advice, not savings
+
+- **Dedup warns are never banked.** When MONETA flags a repeat read/search/fetch, there's no counterfactual for what the agent would have done — so the catch is counted on the card (`dedup catches`) but adds zero to the avoided ticker. Also: after a context compaction a re-read can be *correct*; the warn says so and steps aside.
+- **Budget checkpoints fire on the bridge number,** which lags and approximates (see below). They speak once each and never block. Whether wrapping up at 80% saved your session's quality is not measurable, so it is not measured.
+
 ## Mechanical limits
 
 - **The bridge lags.** Hooks can't see context usage (no token fields in hook input: verified against docs). MONETA's statusline persists it per refresh, which trails by roughly one API response. The 40% gate therefore fires on an *approximate* number: it warns, it never blocks, and the card says "estimate."

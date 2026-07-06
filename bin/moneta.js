@@ -21,8 +21,12 @@ function install() {
     const exists = s.hooks[event].some(g => (g.hooks || []).some(h => String(h.command || '').includes(MARK)));
     if (!exists) s.hooks[event].push({ matcher, hooks: [{ type: 'command', command: hookCmd(script), timeout: 20 }] });
   };
-  ensure('PreToolUse', 'Read|Grep|Glob|WebFetch', 'pretooluse.js');
+  ensure('PreToolUse', '*', 'pretooluse.js');
   ensure('PostToolUse', '*', 'posttooluse.js');
+  // v1 -> v2 migration: widen a previously-installed narrow PreToolUse matcher.
+  for (const g of s.hooks.PreToolUse || []) {
+    if ((g.hooks || []).some(h => String(h.command || '').includes(MARK))) g.matcher = '*';
+  }
 
   // Statusline: adopt if empty; wrap if the user already has one.
   const slCmd = `node "${path.join(REPO, 'statusline', 'moneta-statusline.js')}"`;
@@ -38,9 +42,18 @@ function install() {
   }
   writeJSON(SETTINGS, s);
   if (!fs.existsSync(path.join(HOME, 'config.json'))) writeJSON(path.join(HOME, 'config.json'), DEFAULTS);
-  console.log('MONETA installed: discipline lens (warn-mode), 40% pre-work gate, honest ledger.');
+  console.log('MONETA installed (Tier 2, measured): discipline lens (warn-mode), dedup lens, 40% pre-work gate, budget checkpoints, honest ledger.');
   console.log('Config: ' + path.join(HOME, 'config.json') + ' (mode stays "warn" unless YOU set "deny").');
+  console.log('Tier 1 (all other agents in a workspace): run "moneta compile" in that workspace.');
   siblingCheck();
+}
+
+// Tier 1: compile the doctrine into agent instruction files (CLAUDE.md/AGENTS.md/Cursor/Windsurf).
+// Dry-run by default; --apply writes; --remove strips; --create scaffolds AGENTS.md when none exists.
+function compileCmd(args) {
+  const { compile, renderCompile } = require('../lib/compile');
+  const dir = val(args, '--target') || process.cwd();
+  console.log(renderCompile(compile({ dir, apply: args.includes('--apply'), create: args.includes('--create'), remove: args.includes('--remove') })));
 }
 
 function uninstall() {
@@ -103,7 +116,7 @@ function setup() {
   const s = readJSON(SETTINGS, {});
   const hooked = ['PreToolUse', 'PostToolUse'].every(ev => (s.hooks && s.hooks[ev] || []).some(g => (g.hooks || []).some(h => String(h.command || '').includes(MARK))));
   const sl = s.statusLine && String(s.statusLine.command || '').includes(MARK);
-  console.log('Step 1 of 3: the lens and the meter (required, one command, automatic forever after)');
+  console.log('Step 1 of 4: the lens and the meter (Tier 2: required, one command, automatic forever after)');
   if (hooked && sl) ok('Registered. Every session is watched: warnings before fat reads, honest counting after.');
   else {
     todo('Run: moneta install');
@@ -113,18 +126,27 @@ function setup() {
     info('statusline, MONETA runs yours first and appends: nothing is replaced.');
   }
 
-  // Step 2: how it counts
-  console.log('\nStep 2 of 3: understand the number (nothing to configure)');
+  // Step 2: Tier 1 doctrine for every OTHER agent in the workspace
+  console.log('\nStep 2 of 4: the doctrine (Tier 1: every agent, any model, same workspace)');
+  info('Hooks only govern THIS runtime. "moneta compile" writes the same discipline rules into the');
+  info('workspace instruction files every agent reads (CLAUDE.md, AGENTS.md, Cursor, Windsurf),');
+  info('behind managed markers, dry-run first. Honest limit: those agents are governed but');
+  info('UNMEASURED: no hooks means no ledger, and MONETA never invents a number for them.');
+
+  // Step 3: how it counts
+  console.log('\nStep 3 of 4: understand the number (nothing to configure)');
   info('The ticker is a LOWER BOUND, always labeled an estimate. A warn only counts when your agent');
   info('actually obeyed it (grepped instead of reading whole). Each warn counts at most once. MONETA');
   info('never claims per-rule percentages: no counterfactual exists, so that number would be fake.');
 
-  // Step 3: dials
+  // Step 4: dials
   const cfg = loadConfig();
-  console.log('\nStep 3 of 3: the dials (OPTIONAL: the defaults are the recommendation)');
+  console.log('\nStep 4 of 4: the dials (OPTIONAL: the defaults are the recommendation)');
   ok(`mode: "${cfg.mode}"${cfg.mode === 'warn' ? ' (warnings only, never blocks: the default we recommend)' : ' (deny-mode: oversized reads are BLOCKED: you opted into this)'}`);
   info(`warn threshold: reads estimated over ~${Math.round(cfg.read_warn_tokens / 1000)}k tokens get a nudge. Raise it in ~/.moneta/config.json if your work needs whole files.`);
   info(`pre-work gate: ${cfg.pregate_pct}% of context on reading before the first edit triggers a re-plan suggestion.`);
+  info(`budget checkpoints: one nudge each at ${(cfg.budget_thresholds || []).join('% and ')}% context used (offload, then wrap+compact).`);
+  info(`output nudge: shell/webfetch/MCP/agent results over ~${Math.round(cfg.output_warn_tokens / 1000)}k tokens get a once-per-class filtering tip.`);
 
   // Handshake
   const fsx = require('fs');
@@ -135,10 +157,12 @@ function setup() {
 }
 
 const [cmd, ...args] = process.argv.slice(2);
-({ install, uninstall, status, setup, report: () => report(args) }[cmd] || (() => {
-  console.log('moneta <setup|install|uninstall|report|status>');
+({ install, uninstall, status, setup, compile: () => compileCmd(args), report: () => report(args) }[cmd] || (() => {
+  console.log('moneta <setup|install|compile|uninstall|report|status>');
   console.log('  setup      guided, state-aware walkthrough: explains every step, safe to re-run');
-  console.log('  install    discipline lens + 40% gate + honest ledger + statusline bridge/ticker');
+  console.log('  install    Tier 2 (this runtime): discipline+dedup lens, 40% gate, budget checkpoints, honest ledger, ticker');
+  console.log('  compile    Tier 1 (every agent): write the doctrine into CLAUDE.md/AGENTS.md/Cursor/Windsurf');
+  console.log('             dry-run by default; --apply writes, --remove strips, --create scaffolds AGENTS.md, --target <dir>');
   console.log('  report     session report card (--session <id> for a specific one)');
   console.log('  status     lifetime lower-bound counter');
 }))();
