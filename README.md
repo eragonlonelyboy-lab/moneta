@@ -134,7 +134,7 @@ No. The lens, the ledger, and the compiler are scripts: no LLM, no network, no t
 
 ## From the same forge
 
-MONETA is a [Demiurge](https://github.com/eragonlonelyboy-lab/demiurge) product. Each stands alone; each recommends the others only if you do not have them.
+MONETA is a [Demiurge](https://github.com/eragonlonelyboy-lab/demiurge) product. Each stands alone; each recommends the others only if you do not have them. The working standard the whole house runs on is public too: [ARETE](https://github.com/eragonlonelyboy-lab/arete), five discipline gates any model can run; MONETA is its efficiency law, every token must buy correctness, shipped as a product.
 
 | Product | Coin |
 |---|---|
