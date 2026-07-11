@@ -175,6 +175,12 @@ const card5 = renderReport(buildReport(SID5));
 check('card shows dedup catches + tier line', card5.includes('dedup catches') && card5.includes('governed, unmeasured'), '');
 const card6 = renderReport(buildReport(SID6));
 check('card shows intake by class', card6.includes('intake by class') && card6.includes('shell'), '');
+const workLedger = path.join(HOME, 'sessions', SID6, 'ledger.jsonl');
+fs.appendFileSync(workLedger, JSON.stringify({ kind: 'intake', tool_class: 'shell', est_tokens: 321, work_id: 'T-321' }) + '\n');
+fs.appendFileSync(workLedger, JSON.stringify({ kind: 'budget', threshold: 80, pct: 85, work_id: 'T-321' }) + '\n');
+const workReport = buildReport(SID6);
+check('report attributes intake and budget checkpoints to stable work id', workReport.work_units.some(w => w.work_id === 'T-321' && w.intake_tokens_est === 321 && w.budget_breaches === 1), JSON.stringify(workReport.work_units));
+check('rendered card names the stable work id', renderReport(workReport).includes('T-321: ~321 tokens'), '');
 
 // Results
 console.log('\nMONETA accounting benchmark');
