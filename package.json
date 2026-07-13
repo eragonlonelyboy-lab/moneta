@@ -1,6 +1,6 @@
 {
   "name": "demiurge-moneta",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Your agent reads a 3,000-line file for 5 lines. MONETA minds the spend. Honest token discipline: lower bounds only, no fake numbers.",
   "bin": { "moneta": "bin/moneta.js" },
   "main": "lib/report.js",
