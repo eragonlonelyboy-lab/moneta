@@ -69,6 +69,8 @@ The hooks are thin adapters over a runtime-agnostic core (`lib/core.js`): Claude
 
 ## Install for your agent
 
+> **From npm:** `npm install -g demiurge-moneta`, then `moneta install` (hooks) or `moneta compile` (doctrine) — or `npx demiurge-moneta install` with no install. Source build below.
+
 MONETA ships as two things: **live hooks** that measure, and **compiled doctrine** that governs. Which one you get depends on what your agent can run.
 
 **Live hooks (measured): Claude Code today.** Hooks are the reference implementation and they ship now:
